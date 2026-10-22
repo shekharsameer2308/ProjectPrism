@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2026-10-22
 
+### Phase 5: Consumption Marts & Revenue Leak Discovery (Completed)
+- **Executive Consumption Marts (`models/marts/mart_*.sql`):**
+  - Built all 5 production consumption marts:
+    - `mart_unit_economics`: Daily unit economics for the CFO (Blended CAC, Blended CPA, gross margin, shipping margin, net revenue, contribution margin, and true CM-ROAS).
+    - `mart_channel_performance`: Campaign-level audit for the CMO contrasting self-reported platform ROAS against true multi-touch CM-ROAS, channel CAC, and CPA with dynamic `model_name` filtering.
+    - `mart_customer_retention`: Monthly cohort retention heatmaps (D30, D60, D90) and 12-month cumulative CM LTV curves segmented by first-order acquisition channel for the CSO.
+    - `mart_attribution_comparison`: Side-by-side comparison of Last-Touch vs. Linear, Position-Based, and Time-Decay models, isolating over-credited channels (Google Brand Search: -$4.76M / -32.2% under multi-touch) and under-credited top-of-funnel discovery (TikTok Spark TopFunnel: +$1.03M under multi-touch).
+    - `mart_campaign_margin_leak`: Flagship consulting model ranking campaigns by CM-ROAS, calculating net margin destruction, and segmenting margin efficiency.
+- **Planted Revenue Leak Validated:**
+  - `Meta_Prospecting_BroadDeal`:
+    - Total Spend: **$12,487,826.46**
+    - Platform Reported Revenue: **$51,204,098.24** (**4.10x Platform ROAS** > 3.0)
+    - Realized Net Revenue: **$653,794.10**
+    - Realized Contribution Margin: **-$487,199.22** (**-0.04x True CM-ROAS** < 1.0)
+    - Net Margin Destruction: **$12.98M**
+    - Classified as: **`CRITICAL REVENUE LEAK`**
+- **Testing & Verification (`models/marts/schema.yml`):**
+  - Added surrogate primary keys, not-null constraints, and accepted values tests.
+  - Full project dbt build passed: **152 of 152 operations passed (20 models + 132 tests)** with 0 errors and 0 warnings.
+
 ### Phase 4: Intermediate Business Logic & Multi-Touch Attribution (Completed)
 - **Order Economics (`models/intermediate/int_order_margin.sql`):**
   - Calculated per-order unit economics: Net Revenue (`gross_revenue - discount - refunds`), Total COGS, Shipping Margin (`charged - cost`), Payment Fees, and Contribution Margin (`Net Revenue - COGS - Shipping - Fees`).

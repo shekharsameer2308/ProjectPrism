@@ -106,7 +106,7 @@ make test
 | **Phase 2** | Synthetic Data Generator (Seed=42, Planted Leak) & Ingestion | **Completed** |
 | **Phase 3** | dbt Staging Layer, Sources, Freshness & Schema Tests | **Completed** |
 | **Phase 4** | Intermediate Layer (CM Calculation & 4 Attribution Models) | **Completed** |
-| **Phase 5** | Consumption Marts & Margin Leak Analysis | Pending |
+| **Phase 5** | Consumption Marts & Margin Leak Analysis | **Completed** |
 | **Phase 6** | Airflow Orchestration & Backfill DAGs | Pending |
 | **Phase 7** | Looker Studio Dashboards & Field Specs | Pending |
 | **Phase 8** | Consulting Pitch Folder (Deck, SOW, Architecture) | Pending |

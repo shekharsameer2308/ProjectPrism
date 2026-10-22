@@ -1,0 +1,137 @@
+version: 2
+
+models:
+  - name: mart_unit_economics
+    description: "Executive unit economics mart for the CFO: tracks blended CAC, blended CPA, contribution margin waterfall, and true CM-ROAS by date and attribution model."
+    columns:
+      - name: unit_econ_id
+        description: "Surrogate primary key: md5(date || model_name)."
+        tests:
+          - unique
+          - not_null
+      - name: date
+        description: "Aggregation date."
+        tests:
+          - not_null
+      - name: model_name
+        description: "Attribution model."
+        tests:
+          - not_null
+      - name: total_spend
+        description: "Total acquisition spend."
+        tests:
+          - not_null
+      - name: total_orders
+        description: "Attributed order volume."
+        tests:
+          - not_null
+      - name: net_revenue
+        description: "Net realized revenue."
+        tests:
+          - not_null
+      - name: contribution_margin
+        description: "Realized contribution margin."
+        tests:
+          - not_null
+
+  - name: mart_channel_performance
+    description: "Executive channel performance mart for the CMO: side-by-side comparison of Platform ROAS vs True CM-ROAS, channel CAC, and CPA with attribution model filtering."
+    columns:
+      - name: channel_perf_id
+        description: "Surrogate primary key: md5(date || model_name || platform || campaign_id)."
+        tests:
+          - unique
+          - not_null
+      - name: date
+        description: "Activity date."
+        tests:
+          - not_null
+      - name: model_name
+        description: "Attribution model."
+        tests:
+          - not_null
+      - name: platform
+        description: "Marketing platform."
+        tests:
+          - not_null
+      - name: campaign_id
+        description: "Campaign identifier."
+        tests:
+          - not_null
+      - name: spend
+        description: "Platform ad spend."
+        tests:
+          - not_null
+
+  - name: mart_customer_retention
+    description: "Executive retention mart for the CSO: monthly cohort retention rates (D30, D60, D90) and 12-month CM LTV curves segmented by acquisition channel."
+    columns:
+      - name: cohort_id
+        description: "Surrogate primary key: md5(cohort_month || acquisition_platform || acquisition_campaign_id)."
+        tests:
+          - unique
+          - not_null
+      - name: cohort_month
+        description: "First purchase cohort month."
+        tests:
+          - not_null
+      - name: acquisition_platform
+        description: "First-touch acquisition platform."
+        tests:
+          - not_null
+      - name: cohort_size
+        description: "Total new customer acquisitions in cohort."
+        tests:
+          - not_null
+
+  - name: mart_attribution_comparison
+    description: "Strategic model comparison mart: contrasts Last-Touch against Linear, Position-Based, and Time-Decay models by campaign, highlighting over- and under-credited channels."
+    columns:
+      - name: comparison_id
+        description: "Surrogate primary key: md5(platform || campaign_id)."
+        tests:
+          - unique
+          - not_null
+      - name: platform
+        description: "Marketing platform."
+        tests:
+          - not_null
+      - name: campaign_id
+        description: "Campaign identifier."
+        tests:
+          - not_null
+      - name: campaign_name
+        description: "Campaign descriptive name."
+        tests:
+          - not_null
+
+  - name: mart_campaign_margin_leak
+    description: "Consulting prototype flagship mart: ranks all campaigns by Contribution Margin ROAS and flags negative-margin campaigns hidden behind inflated platform ROAS."
+    columns:
+      - name: leak_id
+        description: "Surrogate primary key: md5(platform || campaign_id)."
+        tests:
+          - unique
+          - not_null
+      - name: platform
+        description: "Ad platform."
+        tests:
+          - not_null
+      - name: campaign_id
+        description: "Campaign identifier."
+        tests:
+          - not_null
+      - name: campaign_name
+        description: "Campaign name."
+        tests:
+          - not_null
+      - name: total_spend
+        description: "Total ad spend."
+        tests:
+          - not_null
+      - name: margin_efficiency_segment
+        description: "Strategic classification of margin profitability."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['CRITICAL REVENUE LEAK', 'MARGIN DESTRUCTIVE', 'MODERATE EFFICIENCY', 'HIGH CONTRIBUTION MARGIN']

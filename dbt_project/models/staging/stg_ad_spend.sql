@@ -10,7 +10,10 @@ standardized as (
         cast(date as date) as spend_date,
         trim(platform) as platform,
         coalesce(nullif(trim(campaign_id), ''), 'unattributed') as campaign_id,
-        coalesce(nullif(trim(campaign_name), ''), 'Unattributed') as campaign_name,
+        case
+            when nullif(trim(campaign_id), '') is null then 'Unattributed'
+            else coalesce(nullif(trim(campaign_name), ''), 'Unattributed')
+        end as campaign_name,
         cast(impressions as integer) as impressions,
         cast(clicks as integer) as clicks,
         cast(spend as numeric) as spend_amount,
