@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2026-10-22
 
+### Phase 6: Airflow Orchestration & Backfill Resilience (Completed)
+- **Daily Ingestion DAG (`airflow/dags/ingest_daily.py`):**
+  - Scheduled daily at `02:00 UTC` (`0 2 * * *`).
+  - Tasks: `extract_daily_partition` $\to$ `upload_to_gcs_partition` $\to$ `load_to_bigquery_partition` $\to$ `verify_ingestion_quality`.
+  - Configured 2-hour SLA, exponential backoff retries (2 retries, 5m initial delay), execution timeouts (45m), and failure callback (`notify_pipeline_failure`).
+  - Designed for date-partitioned idempotency (`dt={{ ds }}`) with partition overwrite semantics.
+- **Daily Transformation DAG (`airflow/dags/dbt_build_daily.py`):**
+  - Scheduled daily at `04:00 UTC` (`0 4 * * *`).
+  - Tasks: `dbt_source_freshness` $\to$ `dbt_staging_build` $\to$ `dbt_intermediate_build` $\to$ `dbt_marts_build` $\to$ `dbt_singular_tests` $\to$ `dbt_docs_generate`.
+  - Configured 1-hour SLA, automated retries, and contextual failure callback (`notify_dbt_failure`).
+- **7-Day Backfill & Idempotency Testing (`airflow/test_backfill.py`):**
+  - Executed a 7-day backfill test (`2025-01-01` to `2025-01-07`).
+  - Verified that duplicate re-runs produce identical row counts across all raw tables with **zero duplicate accumulation**.
+
 ### Phase 5: Consumption Marts & Revenue Leak Discovery (Completed)
 - **Executive Consumption Marts (`models/marts/mart_*.sql`):**
   - Built all 5 production consumption marts:
