@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2026-10-22
 
+### Phase 3: dbt Staging Layer, Sources & Data Quality (Completed)
+- **Sources & Freshness (`models/staging/sources.yml`):**
+  - Configured all 7 raw sources with table descriptions, schema specifications, and freshness monitors (`warn_after: 24h`, `error_after: 48h`).
+  - Executed `dbt source freshness`; validated that freshness assertions correctly flag historical datasets as expected in pre-production.
+- **Staging SQL Models (`models/staging/stg_*.sql`):**
+  - Implemented 7 staging models following CTE pattern:
+    - `stg_ad_spend`: Deduplicated spend on `(spend_date, platform, campaign_id)`, mapped null campaigns to `'unattributed'`, standardized platform names.
+    - `stg_customers`: Deduplicated on `customer_id`, trimmed geographic regions.
+    - `stg_orders`: Deduplicated on `order_id` (cleansed ~2% noise), cast timestamps to UTC, normalized financial fields.
+    - `stg_order_items`: Generated surrogate key `order_item_id`, computed line-level revenue and COGS.
+    - `stg_returns`: Deduplicated refunds on `(order_id, sku)`, normalized UTC timestamps.
+    - `stg_touchpoints`: Deduplicated on `touch_id` (cleansed ~2% noise), mapped null campaign IDs to `'unattributed'`.
+    - `stg_products`: Deduplicated on `sku`, computed unit gross margin and gross margin rate.
+- **Testing & Verification (`models/staging/schema.yml`):**
+  - Authored documentation and tests across all staging entities: `unique`, `not_null`, `accepted_values` (`order_status`, `touch_type`, `platform`), and referential integrity `relationships` (`orders -> customers`, `order_items -> orders`, `order_items -> products`, `returns -> orders`, `touchpoints -> customers`).
+  - Ran `dbt build --select staging`: **100% pass rate (69/69 resources: 7 models + 62 tests)** with 0 failures and 0 warnings.
+
 ### Phase 2: Synthetic Data & Lake Ingestion (Completed)
 - **Synthetic Data Engine (`data_gen/generate.py`):**
   - Generated 24 months (731 days, 2024-01-01 to 2025-12-31) of data with fixed random seed (`Seed=42`).

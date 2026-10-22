@@ -1,0 +1,249 @@
+version: 2
+
+models:
+  - name: stg_ad_spend
+    description: "Staged marketing spend, impressions, clicks, and platform-reported revenue. Deduplicated with null campaign IDs safely mapped to 'unattributed'."
+    columns:
+      - name: spend_id
+        description: "Surrogate primary key: md5(spend_date || platform || campaign_id)."
+        tests:
+          - unique
+          - not_null
+      - name: spend_date
+        description: "Date of ad spend."
+        tests:
+          - not_null
+      - name: platform
+        description: "Ad platform network."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Google Ads', 'Meta Ads', 'TikTok Ads', 'Programmatic Display']
+      - name: campaign_id
+        description: "Campaign identifier (coalesced to 'unattributed' when missing)."
+        tests:
+          - not_null
+      - name: campaign_name
+        description: "Descriptive campaign name."
+        tests:
+          - not_null
+      - name: impressions
+        description: "Delivered impression count."
+        tests:
+          - not_null
+      - name: clicks
+        description: "Registered click count."
+        tests:
+          - not_null
+      - name: spend_amount
+        description: "Ad cost in USD."
+        tests:
+          - not_null
+      - name: platform_conversions
+        description: "Ad platform self-reported conversions."
+      - name: platform_revenue
+        description: "Ad platform self-reported gross revenue."
+
+  - name: stg_customers
+    description: "Staged unique customer entity, first order acquisition date, region, and hashed PII."
+    columns:
+      - name: customer_id
+        description: "Primary key for customer."
+        tests:
+          - unique
+          - not_null
+      - name: first_order_date
+        description: "Date of first order placed."
+        tests:
+          - not_null
+      - name: customer_region
+        description: "Geographic region of customer."
+        tests:
+          - not_null
+      - name: email_hash
+        description: "Hashed customer email."
+
+  - name: stg_orders
+    description: "Staged order headers deduplicated from raw orders (~2% dups removed). Normalized to UTC timestamps."
+    columns:
+      - name: order_id
+        description: "Primary key for order."
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Foreign key referencing stg_customers."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+      - name: order_timestamp
+        description: "Order timestamp in UTC."
+        tests:
+          - not_null
+      - name: order_date
+        description: "Order date in UTC."
+        tests:
+          - not_null
+      - name: gross_revenue
+        description: "Gross order total in USD."
+        tests:
+          - not_null
+      - name: discount_amount
+        description: "Promotional discount in USD."
+        tests:
+          - not_null
+      - name: shipping_charged
+        description: "Shipping fee charged to customer."
+        tests:
+          - not_null
+      - name: shipping_cost
+        description: "Actual carrier shipping cost incurred by company."
+        tests:
+          - not_null
+      - name: payment_fee
+        description: "Payment gateway processing fee."
+        tests:
+          - not_null
+      - name: tax_amount
+        description: "Sales tax charged."
+        tests:
+          - not_null
+      - name: order_status
+        description: "Fulfillment status."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['completed', 'cancelled']
+
+  - name: stg_order_items
+    description: "Staged line item details per order."
+    columns:
+      - name: order_item_id
+        description: "Surrogate primary key: md5(order_id || sku)."
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: "Foreign key referencing stg_orders."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+      - name: sku
+        description: "Foreign key referencing stg_products."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_products')
+              field: sku
+      - name: quantity
+        description: "Quantity of items purchased."
+        tests:
+          - not_null
+      - name: unit_price
+        description: "Unit list / sale price."
+        tests:
+          - not_null
+      - name: unit_cogs
+        description: "Unit cost of goods sold."
+        tests:
+          - not_null
+
+  - name: stg_returns
+    description: "Staged customer returns and refunds per order and SKU."
+    columns:
+      - name: return_id
+        description: "Surrogate primary key: md5(order_id || sku)."
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: "Foreign key referencing stg_orders."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+      - name: sku
+        description: "Foreign key referencing stg_products."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_products')
+              field: sku
+      - name: return_timestamp
+        description: "Timestamp when return was logged in UTC."
+        tests:
+          - not_null
+      - name: refund_amount
+        description: "Refunded amount in USD."
+        tests:
+          - not_null
+
+  - name: stg_touchpoints
+    description: "Staged pre-purchase touchpoint events deduplicated from raw stream (~2% dups removed). Null campaign IDs mapped to 'unattributed'."
+    columns:
+      - name: touch_id
+        description: "Primary key for customer marketing touchpoint."
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Foreign key referencing stg_customers."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+      - name: touch_timestamp
+        description: "Timestamp of marketing interaction in UTC."
+        tests:
+          - not_null
+      - name: platform
+        description: "Advertising platform."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Google Ads', 'Meta Ads', 'TikTok Ads', 'Programmatic Display']
+      - name: campaign_id
+        description: "Foreign key to ad campaign or 'unattributed'."
+        tests:
+          - not_null
+      - name: touch_type
+        description: "Interaction type (click or impression)."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['click', 'impression']
+
+  - name: stg_products
+    description: "Staged product SKU dimensions, list prices, and unit manufacturing costs."
+    columns:
+      - name: sku
+        description: "Primary key for product SKU."
+        tests:
+          - unique
+          - not_null
+      - name: product_category
+        description: "Merchandise category."
+        tests:
+          - not_null
+      - name: list_price
+        description: "Standard list price in USD."
+        tests:
+          - not_null
+      - name: unit_cogs
+        description: "Unit cost of goods sold in USD."
+        tests:
+          - not_null
+      - name: unit_gross_margin
+        description: "Dollar gross margin (list_price - unit_cogs)."
+        tests:
+          - not_null
+      - name: gross_margin_rate
+        description: "Percentage gross margin rate."
+        tests:
+          - not_null

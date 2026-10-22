@@ -104,7 +104,7 @@ make test
 |---|---|---|
 | **Phase 1** | Foundations & Scaffolding (Makefile, Docker, Env, Structure) | **Completed** |
 | **Phase 2** | Synthetic Data Generator (Seed=42, Planted Leak) & Ingestion | **Completed** |
-| **Phase 3** | dbt Staging Layer, Sources, Freshness & Schema Tests | Pending |
+| **Phase 3** | dbt Staging Layer, Sources, Freshness & Schema Tests | **Completed** |
 | **Phase 4** | Intermediate Layer (CM Calculation & 4 Attribution Models) | Pending |
 | **Phase 5** | Consumption Marts & Margin Leak Analysis | Pending |
 | **Phase 6** | Airflow Orchestration & Backfill DAGs | Pending |

@@ -1,0 +1,134 @@
+version: 2
+
+sources:
+  - name: raw
+    description: "Raw landed omnichannel marketing, sales transactions, and customer touchpoint datasets."
+    schema: raw
+    tables:
+      - name: raw_ad_spend
+        description: "Daily marketing campaign spend, impressions, clicks, and self-reported platform metrics."
+        freshness:
+          warn_after: {count: 24, period: hour}
+          error_after: {count: 48, period: hour}
+        loaded_at_field: "cast(date as timestamp)"
+        columns:
+          - name: date
+            description: "Date of ad delivery (YYYY-MM-DD)."
+          - name: platform
+            description: "Ad advertising network (Google Ads, Meta Ads, TikTok Ads, Programmatic Display)."
+          - name: campaign_id
+            description: "Unique campaign identifier (CMP-*). Injected with ~1% nulls to test pipeline resilience."
+          - name: campaign_name
+            description: "Descriptive campaign name (e.g. Meta_Prospecting_BroadDeal)."
+          - name: impressions
+            description: "Ad impressions delivered."
+          - name: clicks
+            description: "Ad link clicks registered."
+          - name: spend
+            description: "Ad platform spend cost in USD."
+          - name: platform_reported_conversions
+            description: "Conversions claimed by the ad network (un-deduplicated)."
+          - name: platform_reported_revenue
+            description: "Gross revenue claimed by the ad network (un-deduplicated)."
+
+      - name: raw_customers
+        description: "Customer master record with acquisition date, geography, and hashed PII."
+        columns:
+          - name: customer_id
+            description: "Primary key for customer entity (CUST-*)."
+          - name: first_order_date
+            description: "Cohort registration date (YYYY-MM-DD)."
+          - name: region
+            description: "Customer geographic region."
+          - name: email_hash
+            description: "SHA256 salted hash of customer email for privacy compliance."
+
+      - name: raw_orders
+        description: "Order headers from ERP/eCommerce store. Contains intentional ~2% duplicate rows to validate deduplication."
+        freshness:
+          warn_after: {count: 24, period: hour}
+          error_after: {count: 48, period: hour}
+        loaded_at_field: "cast(order_ts as timestamp)"
+        columns:
+          - name: order_id
+            description: "Order header identifier (ORD-*)."
+          - name: customer_id
+            description: "Foreign key to customer."
+          - name: order_ts
+            description: "Order placement timestamp."
+          - name: gross_revenue
+            description: "Total line item sum before discounts."
+          - name: discount
+            description: "Coupon or promotional discount deducted."
+          - name: shipping_charged
+            description: "Freight amount billed to customer."
+          - name: shipping_cost
+            description: "Actual carrier shipping cost absorbed by merchant."
+          - name: payment_fee
+            description: "Merchant payment gateway processing fee (2.9% + $0.30)."
+          - name: tax
+            description: "Sales tax charged."
+          - name: status
+            description: "Order fulfillment status (completed, cancelled)."
+
+      - name: raw_order_items
+        description: "Itemized line items per order."
+        columns:
+          - name: order_id
+            description: "Foreign key referencing raw_orders."
+          - name: sku
+            description: "Foreign key referencing raw_products."
+          - name: qty
+            description: "Quantity purchased."
+          - name: unit_price
+            description: "Unit selling price in USD."
+          - name: unit_cogs
+            description: "Unit cost of goods sold in USD."
+
+      - name: raw_returns
+        description: "Product returns and customer refund amounts."
+        freshness:
+          warn_after: {count: 48, period: hour}
+          error_after: {count: 96, period: hour}
+        loaded_at_field: "cast(return_ts as timestamp)"
+        columns:
+          - name: order_id
+            description: "Foreign key referencing raw_orders."
+          - name: sku
+            description: "Foreign key referencing returned SKU."
+          - name: return_ts
+            description: "Timestamp when return was processed."
+          - name: refund_amount
+            description: "Dollar amount refunded back to customer."
+
+      - name: raw_touchpoints
+        description: "Pre-purchase customer interaction stream (clicks & impressions). Contains ~2% dups and ~1% null campaign IDs."
+        freshness:
+          warn_after: {count: 24, period: hour}
+          error_after: {count: 48, period: hour}
+        loaded_at_field: "cast(touch_ts as timestamp)"
+        columns:
+          - name: touch_id
+            description: "Unique event identifier (TCH-*)."
+          - name: customer_id
+            description: "Customer or anonymous device identifier."
+          - name: touch_ts
+            description: "Timestamp of marketing interaction."
+          - name: platform
+            description: "Marketing channel / network."
+          - name: campaign_id
+            description: "Foreign key to marketing campaign."
+          - name: touch_type
+            description: "Interaction type (click or impression)."
+
+      - name: raw_products
+        description: "SKU product catalog and unit manufacturing costs."
+        columns:
+          - name: sku
+            description: "Product Stock Keeping Unit identifier (SKU-*)."
+          - name: category
+            description: "Merchandise category (Apparel, Footwear, Electronics, Accessories)."
+          - name: list_price
+            description: "Catalog list price in USD."
+          - name: unit_cogs
+            description: "Unit cost of goods sold in USD."
