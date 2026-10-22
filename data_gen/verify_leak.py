@@ -6,6 +6,7 @@ Analytical verification script demonstrating:
 """
 
 import os
+
 import pandas as pd
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -97,7 +98,7 @@ def run_verification():
 
     print(f"• Campaign Spend:               ${leak_row['campaign_spend']:>12,.2f}")
     print(f"• Platform Reported Revenue:    ${leak_row['platform_rev']:>12,.2f}  (Platform ROAS: {leak_row['platform_roas']}x)")
-    print(f"--------------------------------------------------------------------------")
+    print("--------------------------------------------------------------------------")
     print(f"• Gross Order Revenue:          ${gross:>12,.2f}")
     print(f"• Customer Discounts (Coupons): -${disc:>11,.2f}  ({disc/gross:.1%} discount rate)")
     print(f"• Product Refunds (Returns):    -${ref:>11,.2f}  ({ref/(gross-disc):.1%} return rate)")
@@ -105,7 +106,7 @@ def run_verification():
     print(f"• Cost of Goods Sold (COGS):    -${cogs:>11,.2f}  ({cogs/(gross-disc):.1%} of sales)")
     print(f"• Carrier Shipping Costs:       -${ship:>11,.2f}")
     print(f"• Merchant Gateway Fees:        -${fees:>11,.2f}")
-    print(f"--------------------------------------------------------------------------")
+    print("--------------------------------------------------------------------------")
     print(f"• True Contribution Margin:     ${cm:>12,.2f}  (TRUE CM-ROAS: {cm/leak_row['campaign_spend']:.2f}x)")
     print("==========================================================================")
 

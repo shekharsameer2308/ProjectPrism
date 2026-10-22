@@ -5,8 +5,8 @@ and prints the verified KPI card values.
 """
 
 import os
+
 import duckdb
-import pandas as pd
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(BASE_DIR, "data", "analytics.duckdb")
@@ -46,7 +46,7 @@ def run_reconciliation():
     print(f"• Net New Customers:            {p1['new_customers']:>15,.0f}")
     print(f"• Blended CAC:                  ${p1['blended_cac']:>14,.2f}")
     print(f"• Blended CPA:                  ${p1['blended_cpa']:>14,.2f}")
-    print(f"--------------------------------------------------------------------------")
+    print("--------------------------------------------------------------------------")
     print(f"• Gross Revenue:                ${p1['gross_revenue']:>14,.2f}")
     print(f"• Customer Discounts:          -${p1['discount_amount']:>13,.2f}")
     print(f"• Product Refunds:             -${p1['refund_amount']:>13,.2f}")
@@ -54,7 +54,7 @@ def run_reconciliation():
     print(f"• Cost of Goods Sold (COGS):   -${p1['total_cogs']:>13,.2f}")
     print(f"• Carrier Freight Shipping:    -${p1['shipping_cost']:>13,.2f}")
     print(f"• Payment Processing Fees:     -${p1['payment_fee']:>13,.2f}")
-    print(f"--------------------------------------------------------------------------")
+    print("--------------------------------------------------------------------------")
     print(f"• Total Contribution Margin:    ${p1['contribution_margin']:>14,.2f}  (True CM-ROAS: {p1['true_cm_roas']}x)")
 
     # 2. Page 2: CMO Channel Performance

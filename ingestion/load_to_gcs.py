@@ -5,9 +5,7 @@ using date-partitioned paths: gs://<bucket>/raw/<table_name>/dt=YYYY-MM-DD/
 """
 
 import os
-import sys
-import glob
-from datetime import datetime
+
 import pandas as pd
 from dotenv import load_dotenv
 
@@ -38,7 +36,7 @@ def get_gcs_client():
             client = storage.Client.from_service_account_json(CREDS_PATH, project=GCP_PROJECT)
             print(f"--> [GCS] Authenticated via service account key: {CREDS_PATH}")
             return client
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(f"--> [GCS] Notice: Unable to authenticate with GCP ({e}). Falling back to local lake mode.")
             return None
     return None
@@ -87,7 +85,7 @@ def upload_table_to_gcs(table_name: str, client=None, bucket_name: str = GCS_BUC
                     bucket = client.bucket(bucket_name)
                     blob = bucket.blob(gcs_blob_path)
                     blob.upload_from_filename(local_part_file)
-                except Exception as upload_err:
+                except Exception as upload_err:  # noqa: BLE001
                     print(f"    [Warning] Failed GCS upload for {gcs_blob_path}: {upload_err}")
             uploaded_partitions += 1
 
@@ -106,7 +104,7 @@ def upload_table_to_gcs(table_name: str, client=None, bucket_name: str = GCS_BUC
                 bucket = client.bucket(bucket_name)
                 blob = bucket.blob(gcs_blob_path)
                 blob.upload_from_filename(local_static_file)
-            except Exception as upload_err:
+            except Exception as upload_err:  # noqa: BLE001
                 print(f"    [Warning] Failed GCS upload for {gcs_blob_path}: {upload_err}")
 
         print(f"    ✓ {table_name}: static snapshot stored (path: {gcs_blob_path})")
@@ -123,9 +121,9 @@ def run_gcs_ingestion():
         "raw_touchpoints",
         "raw_returns",
     ]
-    print(f"==========================================================================")
+    print("==========================================================================")
     print(f"GCS Landing Lake Ingestion: Target Bucket = gs://{GCS_BUCKET_NAME}")
-    print(f"==========================================================================")
+    print("==========================================================================")
     for table in tables:
         upload_table_to_gcs(table, client=client)
     print("==> GCS Lake ingestion completed.")

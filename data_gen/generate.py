@@ -10,7 +10,8 @@ Seed: 42 (Reproducible generation)
 import hashlib
 import os
 import random
-from datetime import datetime, timedelta
+from datetime import timedelta
+
 import numpy as np
 import pandas as pd
 import yaml
@@ -136,14 +137,14 @@ def generate_ad_spend(config: dict, start_date: str, end_date: str) -> pd.DataFr
             noise_factor = np.random.uniform(0.92, 1.08)
             spend = round(daily_budget * share * noise_factor, 2)
             cpc = cmp["cpc"] * np.random.uniform(0.95, 1.05)
-            clicks = max(1, int(round(spend / cpc)))
+            clicks = max(1, round(spend / cpc))
             # CTR ~ 1.5% - 3.5%
             ctr = np.random.uniform(0.015, 0.035)
-            impressions = int(round(clicks / ctr))
+            impressions = round(clicks / ctr)
 
             # Platform reported conversions & revenue (inflated due to self-attribution)
             cvr = cmp["cvr"] * np.random.uniform(0.92, 1.08)
-            plat_convs = max(0, int(round(clicks * cvr)))
+            plat_convs = max(0, round(clicks * cvr))
             plat_roas = cmp["plat_roas"] * np.random.uniform(0.95, 1.05)
             plat_revenue = round(spend * plat_roas, 2)
 
@@ -215,13 +216,11 @@ def generate_customer_journey_and_orders(
     # Key: customer_id -> dict(acquisition_campaign, first_order_date, repeat_propensity)
     customer_pool = {}
 
-    scale_up_dt = pd.Timestamp("2024-07-01")
-
     for current_dt in dates:
         # Determine number of new customer orders today
         is_q4_peak = (current_dt.month == 11 and current_dt.day >= 15) or (current_dt.month == 12 and current_dt.day <= 25)
         dow_factor = 1.15 if current_dt.weekday() in (5, 6) else 0.95
-        daily_new_orders_target = int(round(140 * dow_factor * (1.9 if is_q4_peak else 1.0)))
+        daily_new_orders_target = round(140 * dow_factor * (1.9 if is_q4_peak else 1.0))
 
         # 1. New Customer Acquisitions
         for _ in range(daily_new_orders_target):
@@ -461,7 +460,7 @@ def generate_customer_journey_and_orders(
         ]
         if eligible_custs:
             # Repeat order rate
-            daily_repeats = int(round(len(eligible_custs) * 0.0025 * (1.8 if is_q4_peak else 1.0)))
+            daily_repeats = round(len(eligible_custs) * 0.0025 * (1.8 if is_q4_peak else 1.0))
             if daily_repeats > 0:
                 sampled_cids = random.sample(eligible_custs, min(daily_repeats, len(eligible_custs)))
                 for rep_cid in sampled_cids:

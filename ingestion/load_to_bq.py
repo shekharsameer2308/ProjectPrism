@@ -4,7 +4,7 @@ Loads partitioned and clustered raw tables from GCS into Google BigQuery `raw` d
 """
 
 import os
-import sys
+
 import pandas as pd
 from dotenv import load_dotenv
 
@@ -58,7 +58,7 @@ def get_bq_client():
             client = bigquery.Client.from_service_account_json(CREDS_PATH, project=GCP_PROJECT)
             print(f"--> [BigQuery] Connected via service account key: {CREDS_PATH}")
             return client
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(f"--> [BigQuery] Notice: Unable to authenticate with GCP ({e}). Operating in local validation mode.")
             return None
     return None
@@ -136,7 +136,7 @@ def run_bq_ingestion():
     if client:
         ensure_datasets(client)
 
-    for table in TABLE_SPECS.keys():
+    for table in TABLE_SPECS:
         load_table(table, client=client)
     print("==> BigQuery ingestion pipeline complete.")
 

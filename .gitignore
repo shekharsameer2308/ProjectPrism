@@ -36,8 +36,10 @@ wheels/
 # Local Data Storage
 data/raw/
 data/processed/
+data/lake_raw/
 data/*.parquet
 data/*.csv
+data/*.duckdb*
 
 # Airflow
 airflow/logs/

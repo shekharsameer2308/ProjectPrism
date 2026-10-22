@@ -10,10 +10,9 @@ Tests:
 """
 
 import os
-import sys
+
 import duckdb
 import pandas as pd
-from datetime import datetime, timedelta
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(BASE_DIR, "data", "analytics.duckdb")
@@ -24,9 +23,9 @@ def simulate_backfill(start_date: str, end_date: str, run_label: str) -> dict:
     """
     Simulates partition-level ingestion for a date range and returns table metrics.
     """
-    print(f"\n==========================================================================")
+    print("\n==========================================================================")
     print(f"--> [Backfill Simulation] {run_label}: {start_date} to {end_date}")
-    print(f"==========================================================================")
+    print("==========================================================================")
     dates = pd.date_range(start=start_date, end=end_date, freq="D")
     con = duckdb.connect(DB_PATH)
 

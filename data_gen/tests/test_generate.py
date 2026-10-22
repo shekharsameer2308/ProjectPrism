@@ -4,6 +4,7 @@ Verification tests for synthetic data generation and planted margin leak.
 """
 
 import os
+
 import pandas as pd
 import pytest
 

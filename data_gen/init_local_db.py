@@ -5,6 +5,7 @@ so dbt can run full builds and tests locally with zero GCP friction.
 """
 
 import os
+
 import duckdb
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

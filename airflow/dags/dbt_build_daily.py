@@ -11,12 +11,13 @@ Executes:
   6. dbt docs generate (Lineage catalog)
 """
 
-from datetime import datetime, timedelta
-import os
 import logging
-from airflow import DAG
+import os
+from datetime import datetime, timedelta
+
 from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperator
+
+from airflow import DAG
 
 AIRFLOW_HOME = os.getenv("AIRFLOW_HOME", "/opt/airflow")
 DBT_DIR = os.getenv("DBT_PROJECT_DIR", os.path.join(AIRFLOW_HOME, "dbt_project"))

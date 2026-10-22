@@ -7,12 +7,13 @@ Retry Policy: 2 retries with exponential backoff
 Backfill: Supports arbitrary historical execution dates using {{ ds }}
 """
 
-from datetime import datetime, timedelta
-import os
 import logging
-from airflow import DAG
+import os
+from datetime import datetime, timedelta
+
 from airflow.operators.python import PythonOperator
-from airflow.operators.bash import BashOperator
+
+from airflow import DAG
 
 # Environment defaults
 GCP_PROJECT = os.getenv("GCP_PROJECT_ID", "globalretail-analytics-prod")
