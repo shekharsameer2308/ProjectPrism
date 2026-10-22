@@ -1,0 +1,76 @@
+flowchart LR
+    subgraph Ingestion_Sources ["1. Data Sources & Extraction"]
+        GA["Google Ads API<br>(Daily Spend, Clicks)"]
+        MA["Meta Graph API<br>(Daily Spend, Impressions)"]
+        TA["TikTok Ads API<br>(Top-Funnel Events)"]
+        PA["DSP / Display Network<br>(Impression Logs)"]
+        ERP["ERP / Shopify eCommerce<br>(Orders, Items, COGS, Returns)"]
+    end
+
+    subgraph Lake_Landing ["2. Cloud Storage Data Lake (GCS)"]
+        GCS["GCS Landing Bucket<br>gs://globalretail-marketing-lake-raw/<br>• raw/{table}/dt=YYYY-MM-DD/<br>• Idempotent Partition Overwrites"]
+    end
+
+    subgraph Warehouse_Processing ["3. Cloud Data Warehouse (Google BigQuery)"]
+        direction TB
+        subgraph Raw_Layer ["BigQuery raw"]
+            RAW_SPEND["raw_ad_spend"]
+            RAW_ORD["raw_orders"]
+            RAW_ITEMS["raw_order_items"]
+            RAW_RET["raw_returns"]
+            RAW_TOUCH["raw_touchpoints"]
+            RAW_PROD["raw_products"]
+            RAW_CUST["raw_customers"]
+        end
+
+        subgraph Staging_Layer ["dbt staging (stg_)"]
+            STG_SPEND["stg_ad_spend<br>• Deduplication<br>• UTC Timestamps<br>• Null Campaign Mapping"]
+            STG_ORD["stg_orders"]
+            STG_TOUCH["stg_touchpoints"]
+            STG_ITEMS["stg_order_items"]
+            STG_RET["stg_returns"]
+        end
+
+        subgraph Intermediate_Layer ["dbt intermediate (int_)"]
+            INT_MARGIN["int_order_margin<br>• Net Revenue<br>• Order COGS<br>• Freight & Gateway Fees<br>• True Contribution Margin"]
+            INT_SEQ["int_customer_orders<br>• Acquisition vs Repeat Flag<br>• Order Sequencing"]
+            INT_TOUCH["int_touchpoints_windowed<br>• 30d Click / 24h View Window"]
+            INT_ATTR["Multi-Touch Attribution Engine<br>• Last Touch (100%)<br>• Linear (1/N)<br>• Position-Based (40/20/40)<br>• Time-Decay (7d Half-Life)"]
+            INT_REV["int_attributed_revenue<br>(Sum of Credit strictly = 1.0)"]
+        end
+
+        subgraph Marts_Layer ["dbt marts (mart_)"]
+            M_UNIT["mart_unit_economics<br>(CFO Financial Waterfall & Blended CAC)"]
+            M_CHAN["mart_channel_performance<br>(CMO Platform vs CM-ROAS)"]
+            M_LEAK["mart_campaign_margin_leak<br>(Flagship Revenue Leak Detection)"]
+            M_ATTR["mart_attribution_comparison<br>(Over/Under Crediting Audit)"]
+            M_RET["mart_customer_retention<br>(CSO D30/D60/D90 Retention & 12M LTV)"]
+        end
+    end
+
+    subgraph Orchestration ["Orchestration & Data Quality Gate (Airflow & dbt)"]
+        AF_INGEST["Airflow DAG: ingest_daily<br>• 2h SLA<br>• 2x Retries + Backoff<br>• Idempotent Backfill"]
+        AF_DBT["Airflow DAG: dbt_build_daily<br>• Freshness Checks<br>• 132 Tests + Singular Test<br>• Lineage Docs"]
+    end
+
+    subgraph Business_Intelligence ["4. Executive Dashboards (Looker Studio)"]
+        CFO_DASH["CFO Dashboard<br>• Blended CAC Scorecard<br>• Contribution Margin Waterfall<br>• Payback Pacing"]
+        CMO_DASH["CMO Dashboard<br>• Platform vs CM-ROAS Bar Chart<br>• Campaign Leak Table<br>• Model Comparison Selector"]
+        CSO_DASH["CSO Dashboard<br>• Retention Heatmap Matrix<br>• 12M Cohort LTV Curves<br>• Repeat Purchase Rate"]
+    end
+
+    %% Flow Connections
+    GA & MA & TA & PA & ERP --> GCS
+    AF_INGEST -.->|Orchestrates Daily Ingestion| GCS
+    GCS --> Raw_Layer
+    Raw_Layer --> Staging_Layer
+    Staging_Layer --> Intermediate_Layer
+    Intermediate_Layer --> Marts_Layer
+    AF_DBT -.->|Quality Gate & Build| Staging_Layer & Intermediate_Layer & Marts_Layer
+    Marts_Layer --> Business_Intelligence
+
+    %% Governance & Security Callouts
+    classDef security stroke:#EF4444,stroke-width:2px;
+    classDef governance stroke:#3B82F6,stroke-width:2px;
+    class RAW_CUST,STG_ORD security;
+    class INT_REV,M_LEAK governance;

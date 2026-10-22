@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2026-10-22
 
+### Phase 8: Consulting Pitch Folder & Polish (Completed)
+- **Executive Pitch Deck (`pitch_folder/pitch_deck.md`):**
+  - Authored 5-slide Situation-Complication-Resolution presentation tailored for the CEO, CFO, and CMO.
+  - Derived strategic reallocation impact math directly from warehouse marts via SQL: reallocating the $12.49M spend from negative-margin campaigns yields **+$4.39M** in incremental contribution margin (**17.5x ROI** on engagement fee).
+- **Statement of Work (`pitch_folder/statement_of_work.md`):**
+  - Formulated 1-page enterprise consulting contract with 12-week implementation schedule, fixed fee of **$250,000 USD** (milestone-billed 30/40/30), detailed scope, deliverables, assumptions, acceptance criteria, and risk mitigations.
+- **Architecture Diagram (`pitch_folder/architecture_diagram.mermaid`):**
+  - Created end-to-end modern data stack diagram featuring GCS landing lake, BigQuery layers (raw $\to$ staging $\to$ intermediate $\to$ marts), Airflow DAGs, Looker Studio dashboards, and SOC 2 / GDPR privacy callouts (PII SHA256 hashing).
+- **Enterprise Data Dictionary (`docs/data_dictionary.md`):**
+  - Comprehensive field-level dictionary across all staging and mart entities.
+- **Repository Polish (`README.md`):**
+  - Updated master documentation with quickstart commands, consulting talking points, interview preparation notes, and full test badges.
+
 ### Phase 7: Looker Studio Executive Dashboards & Reconciliation (Completed)
 - **Executive BI Build Guides (`looker/`):**
   - Authored master architecture and design guidelines in `looker/README.md`.
