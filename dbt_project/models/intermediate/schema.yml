@@ -1,0 +1,164 @@
+version: 2
+
+models:
+  - name: int_order_margin
+    description: "Calculates true realized financial economics per order: Gross Revenue, Discounts, Refunds, Net Revenue, COGS, Shipping Margin, Payment Gateway Fees, and Contribution Margin (CM)."
+    columns:
+      - name: order_id
+        description: "Primary key for order."
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Customer identifier."
+        tests:
+          - not_null
+      - name: order_timestamp
+        description: "Order timestamp in UTC."
+        tests:
+          - not_null
+      - name: net_revenue
+        description: "Net realized revenue: gross_revenue - discount_amount - total_refunds."
+        tests:
+          - not_null
+      - name: total_cogs
+        description: "Total cost of goods sold across line items."
+        tests:
+          - not_null
+      - name: contribution_margin
+        description: "Dollar contribution margin: net_revenue - total_cogs - shipping_cost - payment_fee."
+        tests:
+          - not_null
+
+  - name: int_customer_orders
+    description: "Sequences customer order history, marks acquisition orders vs repeat orders, and tracks purchase frequency."
+    columns:
+      - name: order_id
+        description: "Primary key for order."
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Customer identifier."
+        tests:
+          - not_null
+      - name: customer_order_sequence
+        description: "Sequential purchase number for customer (1 = first order)."
+        tests:
+          - not_null
+      - name: is_first_order
+        description: "True if this order is the customer's acquisition order."
+        tests:
+          - not_null
+      - name: is_repeat_order
+        description: "True if this order is a repeat purchase."
+        tests:
+          - not_null
+
+  - name: int_touchpoints_windowed
+    description: "Filters and links touchpoints within 30-day click and 24-hour impression lookback windows prior to each order."
+    columns:
+      - name: order_id
+        description: "Order identifier."
+        tests:
+          - not_null
+      - name: touch_id
+        description: "Customer touchpoint identifier."
+        tests:
+          - not_null
+      - name: platform
+        description: "Channel platform."
+        tests:
+          - not_null
+      - name: campaign_id
+        description: "Campaign identifier or 'unattributed' / 'direct_organic'."
+        tests:
+          - not_null
+
+  - name: int_attribution_last_click
+    description: "Last-touch attribution: allocates 100% credit to the final interaction prior to conversion."
+    columns:
+      - name: order_id
+        description: "Order identifier."
+        tests:
+          - unique
+          - not_null
+      - name: attributed_weight
+        description: "Assigned weight (1.0)."
+        tests:
+          - not_null
+
+  - name: int_attribution_linear
+    description: "Linear attribution: allocates uniform fractional credit (1/N) across all touchpoints."
+    columns:
+      - name: order_id
+        description: "Order identifier."
+        tests:
+          - not_null
+      - name: attributed_weight
+        description: "Assigned fractional weight."
+        tests:
+          - not_null
+
+  - name: int_attribution_position_based
+    description: "Position-based (40/20/40 U-shaped) attribution: rewards discovery (40%) and conversion (40%), with 20% across middle assists."
+    columns:
+      - name: order_id
+        description: "Order identifier."
+        tests:
+          - not_null
+      - name: attributed_weight
+        description: "Assigned fractional weight."
+        tests:
+          - not_null
+
+  - name: int_attribution_time_decay
+    description: "Time-decay attribution: exponentially decays credit with a 7-day half-life before order placement."
+    columns:
+      - name: order_id
+        description: "Order identifier."
+        tests:
+          - not_null
+      - name: attributed_weight
+        description: "Assigned fractional weight."
+        tests:
+          - not_null
+
+  - name: int_attributed_revenue
+    description: "Unioned multi-model attribution dataset joining fractional weights to full order-level economics and customer attributes."
+    columns:
+      - name: attribution_id
+        description: "Surrogate primary key: md5(model_name || order_id || touch_id)."
+        tests:
+          - unique
+          - not_null
+      - name: model_name
+        description: "Name of attribution methodology."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['last_touch', 'linear', 'position_based', 'time_decay']
+      - name: order_id
+        description: "Foreign key to order."
+        tests:
+          - not_null
+      - name: platform
+        description: "Marketing platform."
+        tests:
+          - not_null
+      - name: campaign_id
+        description: "Marketing campaign."
+        tests:
+          - not_null
+      - name: attributed_weight
+        description: "Fractional weight assigned to this touchpoint."
+        tests:
+          - not_null
+      - name: attributed_net_revenue
+        description: "Attributed net revenue dollar amount."
+        tests:
+          - not_null
+      - name: attributed_contribution_margin
+        description: "Attributed contribution margin dollar amount."
+        tests:
+          - not_null

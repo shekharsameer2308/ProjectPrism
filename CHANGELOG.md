@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2026-10-22
 
+### Phase 4: Intermediate Business Logic & Multi-Touch Attribution (Completed)
+- **Order Economics (`models/intermediate/int_order_margin.sql`):**
+  - Calculated per-order unit economics: Net Revenue (`gross_revenue - discount - refunds`), Total COGS, Shipping Margin (`charged - cost`), Payment Fees, and Contribution Margin (`Net Revenue - COGS - Shipping - Fees`).
+- **Customer Lifecycle (`models/intermediate/int_customer_orders.sql`):**
+  - Sequenced customer order history with window functions; generated `customer_order_sequence`, `is_first_order`, `is_repeat_order`, and purchase frequency intervals (`days_since_first_order`, `days_since_previous_order`).
+- **Attribution Windowing (`models/intermediate/int_touchpoints_windowed.sql`):**
+  - Filtered touches within configurable lookback windows: 30-day click and 24-hour impression windows prior to purchase. Handled fallback direct/organic paths. Sequenced touches ascending and descending per order.
+- **Attribution Models (4 Methodologies):**
+  - `int_attribution_last_click.sql`: Last-touch (100% credit to conversion touch).
+  - `int_attribution_linear.sql`: Uniform credit (`1 / N`) across all touches.
+  - `int_attribution_position_based.sql`: 40/20/40 U-shaped credit (rewards discovery and conversion equally, with 20% across middle touches).
+  - `int_attribution_time_decay.sql`: Exponential decay with a 7-day half-life (`2^(-age/7d)`).
+- **Unioned Attributed Revenue (`models/intermediate/int_attributed_revenue.sql`):**
+  - Combined all 4 attribution models with `model_name` selector, attributing volume (orders, new customers) and financial economics (net revenue, COGS, contribution margin) by fractional weights.
+- **Singular Credit Conservation Test (`tests/assert_attribution_credit_sums_to_one.sql`):**
+  - Added strict singular test verifying that attributed credit per order sums to exactly **1.0** across all models.
+  - All **99 dbt tests passed** across staging and intermediate layers.
+
 ### Phase 3: dbt Staging Layer, Sources & Data Quality (Completed)
 - **Sources & Freshness (`models/staging/sources.yml`):**
   - Configured all 7 raw sources with table descriptions, schema specifications, and freshness monitors (`warn_after: 24h`, `error_after: 48h`).
