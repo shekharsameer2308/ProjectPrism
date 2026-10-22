@@ -1,0 +1,24 @@
+# Core Analytics & Data Generation
+pandas>=2.2.0
+numpy>=1.26.0
+pyarrow>=15.0.0
+faker>=24.0.0
+pyyaml>=6.0.1
+python-dotenv>=1.0.1
+
+# Google Cloud Platform SDKs
+google-cloud-storage>=2.16.0
+google-cloud-bigquery>=3.20.0
+google-cloud-bigquery-storage>=2.24.0
+db-dtypes>=1.2.0
+
+# dbt Transformation & Modeling
+dbt-core>=1.8.0
+dbt-bigquery>=1.8.0
+
+# Testing & Code Quality
+pytest>=8.1.0
+pytest-mock>=3.14.0
+ruff>=0.3.0
+sqlfluff>=3.0.0
+sqlfluff-templater-dbt>=3.0.0

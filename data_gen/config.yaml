@@ -1,0 +1,92 @@
+# ==============================================================================
+# Synthetic Data Generation Configuration - GlobalRetail Co.
+# ==============================================================================
+seed: 42
+start_date: "2024-01-01"
+end_date: "2025-12-31"
+
+annual_spend_target: 40000000.0
+
+# Channel Spend Allocation (% of total spend)
+channels:
+  google_ads:
+    weight: 0.38
+    campaigns:
+      - name: "Google_Search_Brand"
+        type: "search"
+        weight: 0.25
+        cpc: 1.20
+        cvr: 0.085
+      - name: "Google_Search_NonBrand_Generic"
+        type: "search"
+        weight: 0.50
+        cpc: 2.80
+        cvr: 0.032
+      - name: "Google_Shopping_PMax"
+        type: "shopping"
+        weight: 0.25
+        cpc: 1.50
+        cvr: 0.040
+
+  meta_ads:
+    weight: 0.35
+    campaigns:
+      - name: "Meta_Prospecting_BroadDeal"  # The planted leak campaign
+        type: "social"
+        weight: 0.45
+        cpc: 0.55
+        cvr: 0.048
+        return_rate: 0.28                  # High return rate
+        discount_rate_mean: 0.35          # Heavy discounting
+        cogs_ratio: 0.65                  # Low gross margin SKUs
+      - name: "Meta_Prospecting_Lookalike"
+        type: "social"
+        weight: 0.35
+        cpc: 1.10
+        cvr: 0.030
+        return_rate: 0.08
+        discount_rate_mean: 0.10
+        cogs_ratio: 0.35
+      - name: "Meta_Retargeting_DABA"
+        type: "social"
+        weight: 0.20
+        cpc: 1.80
+        cvr: 0.065
+        return_rate: 0.09
+        discount_rate_mean: 0.12
+        cogs_ratio: 0.35
+
+  tiktok_ads:
+    weight: 0.17
+    scale_up_date: "2024-07-01"            # Mid-period scale up
+    campaigns:
+      - name: "TikTok_Spark_TopFunnel"
+        type: "video"
+        weight: 0.70
+        cpc: 0.45
+        cvr: 0.015                         # Low direct CVR, high assist rate
+      - name: "TikTok_InFeed_Catalog"
+        type: "video"
+        weight: 0.30
+        cpc: 0.75
+        cvr: 0.022
+
+  programmatic_display:
+    weight: 0.10
+    campaigns:
+      - name: "Display_Prospecting_Contextual"
+        type: "display"
+        weight: 0.60
+        cpm: 4.50
+        cpc: 0.90
+        cvr: 0.008
+      - name: "Display_Retargeting_Dynamic"
+        type: "display"
+        weight: 0.40
+        cpm: 8.00
+        cpc: 1.60
+        cvr: 0.025
+
+noise:
+  duplicate_rate: 0.02                     # ~2% duplicate records to test deduplication
+  null_campaign_id_rate: 0.01              # ~1% null campaign ids to test 'unattributed' mapping

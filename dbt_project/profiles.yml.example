@@ -1,0 +1,28 @@
+# dbt profile template for BigQuery connection
+# Copy or merge into ~/.dbt/profiles.yml or set DBT_PROFILES_DIR=.
+marketing_roi_engine:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: "{{ env_var('GCP_PROJECT_ID', 'globalretail-analytics-prod') }}"
+      dataset: "{{ env_var('BQ_DEV_DATASET', 'analytics_dev') }}"
+      threads: 8
+      keyfile: "{{ env_var('GOOGLE_APPLICATION_CREDENTIALS', '/path/to/key.json') }}"
+      location: "{{ env_var('GCP_REGION', 'us-central1') }}"
+      timeout_seconds: 300
+      priority: interactive
+      retries: 1
+
+    prod:
+      type: bigquery
+      method: service-account
+      project: "{{ env_var('GCP_PROJECT_ID', 'globalretail-analytics-prod') }}"
+      dataset: "{{ env_var('BQ_MARTS_DATASET', 'marts') }}"
+      threads: 8
+      keyfile: "{{ env_var('GOOGLE_APPLICATION_CREDENTIALS', '/path/to/key.json') }}"
+      location: "{{ env_var('GCP_REGION', 'us-central1') }}"
+      timeout_seconds: 300
+      priority: interactive
+      retries: 2
